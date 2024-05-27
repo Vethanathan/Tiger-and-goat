@@ -46,17 +46,39 @@ class Board:
                         self.board[to_row][to_col] = 'T'
                 else:
                     if tup:
-                        if self.board[from_row][to_col] == 'T':
+                        if self.board[from_row][from_col] == 'T' and self.board[tup[0]][tup[1]] == 'G':
                             self.goat -= 1
                             self.board[tup[0]][tup[1]] = '_'
-                            self.board[from_row][from_col],self.board[to_row][to_col] = self.board[to_row][to_col],self.board[from_row][from_col]
+                            self.board[from_row][from_col] = '_'
+                            self.board[to_row][to_col] = 'T'
                         else:
                             raise Exception("Invalid Move")
                     else:
-                        self.board[from_row][from_col],self.board[to_row][to_col] = self.board[to_row][to_col],self.board[from_row][from_col]
+                        if self.board[from_row][from_col] == 'T' and self.board[to_row][to_col] =='_':
+                            self.board[from_row][from_col] = '_'
+                            self.board[to_row][to_col] = 'T'
+            elif role == 'goat':
+                if not from_board == ('*','*'):
+                    tup = find_coordinate_between(from_board,to_board)
+                if from_board==('*','*'):
+                    if self.board[to_row][to_col] == 'T':
+                        raise Exception("Invalid Move")
+                    elif self.tiger!=0 and self.board[to_row][to_col]=='_':
+                        self.board[to_row][to_col] = 'G'
+                else:
+                    if tup:
+                        if self.board[from_row][to_col] == 'G' and self.board[tup[0]][tup[1]] == 'T':
+                            self.tiger -= 1
+                            self.board[tup[0]][tup[1]] = '_'
+                            self.board[from_row][from_col] = '_'
+                            self.board[to_row][to_col] = ' G'
+                        else:
+                            raise Exception("Invalid Move")
+                    else:
+                        if self.board[from_row][from_col] == 'G' and self.board[to_row][to_col] =='_':
+                            self.board[from_row][from_col] = '_'
+                            self.board[to_row][to_col] = 'G'
                 
-
-            
 
         
     def board_index(self):
@@ -106,10 +128,13 @@ class Board:
 
 b=Board()
 b.print_board()
-b.make_move(('*','*'),(0,2),'tiger')
+b.make_move(('*','*'),(0,2),'goat')
 b.print_board()
-b.make_move((1,2),(3,2),'tiger')
+b.make_move(('*','*'),(1,2),'tiger')
 b.print_board()
+b.make_move((0,2),(2,2),'goat')
+b.print_board()
+
 
 
 print(b.tiger,b.goat)
