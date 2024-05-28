@@ -1,3 +1,8 @@
 {
-    "editor.defaultFormatter": null
+    "editor.defaultFormatter": null,
+    "python.testing.pytestArgs": [
+        "test"
+    ],
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true
 }
