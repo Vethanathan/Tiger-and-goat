@@ -48,7 +48,11 @@
         var messageInput = document.getElementById("message");
         var message = messageInput.value;
         console.log("Sending message with role:", role); // Debugging
-        socket.emit("message", { message: message, room: room, role: role });
+        socket.emit("message", {
+          message: message,
+          room: room,
+          role: role,
+        });
         messageInput.value = "";
       }
     </script>

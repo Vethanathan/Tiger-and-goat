@@ -85,7 +85,19 @@ def handle_message(data):
     if room:
         emit('message', {"role": role, "message": message}, room=room)
         curr_game = active_games[room]
-        print(curr_game.board.print_board())
+        try:
+            print(message)
+            from_,to_ = message.split(',')
+            from_ind,to_ind = Board.board_vals[from_],Board.board_vals[to_]
+            curr_game.board.make_move(from_ind,to_ind,role)
+            curr_game.board.is_Tiger_turn  = not curr_game.board.is_Tiger_turn
+            curr_game.board.print_board()
+            if curr_game.board.is_game_over()[0]:
+                    return curr_game.board.is_game_over()
+            print(curr_game.board.goat,curr_game.board.tiger,curr_game.board.killed_goat)
+        except Exception as e:
+            pass
+
 
 @app.route('/')
 def index():
