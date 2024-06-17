@@ -1,10 +1,9 @@
 from flask import Flask, render_template, request
 from flask_socketio import SocketIO, emit, join_room, leave_room
-import uuid
 from Boards import Board
 from Games import Game
 
-app = Flask(__name__)
+app = Flask(__name__, static_url_path='/static')
 socketio = SocketIO(app)
 
 # Queue to manage pending users
@@ -16,9 +15,6 @@ active_games = {}
 # Dictionary to store user roles and rooms
 user_roles = {}
 user_rooms = {}
-
-# Sample board for demonstration
-# initial_board = [[0, 0, 0], [0, 0, 0], [0, 0, 0]]
 
 def assign_roles(user1, user2):
     game = Game(user1, user2, Board())
@@ -83,20 +79,57 @@ def handle_message(data):
     room = data.get('room')
     message = data.get('message')
     if room:
-        emit('message', {"role": role, "message": message}, room=room)
         curr_game = active_games[room]
         try:
             print(message)
-            from_,to_ = message.split(',')
-            from_ind,to_ind = Board.board_vals[from_],Board.board_vals[to_]
-            curr_game.board.make_move(from_ind,to_ind,role)
-            curr_game.board.is_Tiger_turn  = not curr_game.board.is_Tiger_turn
+            from_, to_ = message.split(',')
+            from_ind, to_ind = Board.board_vals[from_], Board.board_vals[to_]
+            curr_game.board.make_move(from_ind, to_ind, role)
+            print("test")
+            curr_game.board.is_Tiger_turn = not curr_game.board.is_Tiger_turn
             curr_game.board.print_board()
-            if curr_game.board.is_game_over()[0]:
-                    return curr_game.board.is_game_over()
-            print(curr_game.board.goat,curr_game.board.tiger,curr_game.board.killed_goat)
+
+            # Check if the game is over
+            game_over, winner = curr_game.board.is_game_over()
+            if game_over:
+                print(curr_game.board.is_game_over())
+                emit('game_over', {"winner": winner}, room=room)
+            
+            d = {i: None for i in range(23)}
+
+            c=0
+            curr_b  =curr_game.board.get_board_state()
+            for i in curr_b:
+                for j in i:
+                    if j=='#':
+                        continue
+                    if j=='T' or j=='G':
+                        d[c]='piece'
+                    c+=1   
+            print(d)
+
+            # Emit the updated board to all users in the room
+            emit('update_board', {"board": d}, room=room)
+
+            print(curr_game.board.goat, curr_game.board.tiger, curr_game.board.killed_goat)
+            print(f"Game logic processing: {message}")
         except Exception as e:
-            pass
+            print(f"Error processing move: {e}")
+            d = {i: None for i in range(23)}
+
+            c=0
+            curr_b  =curr_game.board.get_board_state()
+            print(curr_b)
+            for i in curr_b:
+                for j in i:
+                    if j=='#':
+                        continue
+                    if j=='T' or j=='G':
+                        d[c]='piece'
+                    c+=1   
+            print(d)
+            emit('update_board', {"board": d}, room=room)
+
 
 
 @app.route('/')
@@ -104,4 +137,4 @@ def index():
     return render_template('index.html')
 
 if __name__ == '__main__':
-    socketio.run(app, host='0.0.0.0', port=8765,debug=True)
+    socketio.run(app, host='0.0.0.0', port=8765, debug=True)
